@@ -51,6 +51,8 @@ public:
     // get bank account balance
     double getBalance() const { return m_balance; }
 
+    void setBalance(double balance) { m_balance = balance; }
+
     virtual std::string description() { return "Back Account"; }
 
 private:

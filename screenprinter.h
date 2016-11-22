@@ -99,7 +99,7 @@ public:
         OP_VIEW_BALANCE  = 1,
         OP_BEGIN         = OP_VIEW_BALANCE,
         OP_DEPOSIT       = 2,
-        OP_WIDTHDRAW     = 3,
+        OP_WITHDRAW     = 3,
         OP_PRINT_HISTORY = 4,
         OP_RETURN_MENU   = 5,
         OP_END           = OP_RETURN_MENU,

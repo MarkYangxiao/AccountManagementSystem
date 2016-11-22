@@ -56,17 +56,16 @@ bool StockOptionAdapter::dealWithOption(
 {
     bool returnPrevMenu = false;
 
+    StockAccountFactory& factory = StockAccountFactory::getInstance();
+    std::shared_ptr<StockAccount> stock_account =
+            factory.getAccountByName(DEFAULT_ACCOUNT_NAME);
+
     switch (type) {
     case StockAccountPrinter::OP_DISPLAY_PRICE:
         dispalyPriceBySymbol();
         break;
     case StockAccountPrinter::OP_DISPLAY_PORTFOLIO:
-        {
-            StockAccountFactory& factory = StockAccountFactory::getInstance();
-            std::shared_ptr<StockAccount> stock_account =
-                    factory.getAccountByName(DEFAULT_ACCOUNT_NAME);
-            displayCurrentPortfolio(*stock_account);
-        }
+        displayCurrentPortfolio(*stock_account);
         break;
 
     case StockAccountPrinter::OP_BUY_SHARES:
@@ -125,7 +124,7 @@ void StockOptionAdapter::displayCurrentPortfolio
     portfolioValue += cash_balance;
 
     out << "Cash balance = $" << cash_balance << std::endl;
-    out << "Company Symbol\tNumber\tPricePerShare\tTotalValue" << std::endl;
+    out << "CompanySymbol\tNumber\tPricePerShare\tTotalValue" << std::endl;
 
     const std::list<StockAccount::StockRecord>& portfolio = stock_account.getPortfolio();
 
@@ -161,22 +160,26 @@ bool BankOptionAdapter::dealWithOption(
         BankAccountPrinter::Option_Type type) const
 {
     bool returnPrevMenu = false;
+    StockAccountFactory& factory = StockAccountFactory::getInstance();
+    std::shared_ptr<StockAccount> stock_account =
+            factory.getAccountByName(DEFAULT_ACCOUNT_NAME);
+    std::shared_ptr<BankAccount> bank_account = stock_account->getBankAccount();
 
     switch (type) {
     case BankAccountPrinter::OP_VIEW_BALANCE:
-
+        viewAccountBalance(*bank_account);
         break;
 
     case BankAccountPrinter::OP_DEPOSIT:
-
+        depoistMoney(*bank_account);
         break;
 
-    case BankAccountPrinter::OP_WIDTHDRAW:
-
+    case BankAccountPrinter::OP_WITHDRAW:
+        withdrawMoney(*bank_account);
         break;
 
     case BankAccountPrinter::OP_PRINT_HISTORY:
-
+        printHistory(*bank_account);
         break;
 
     case BankAccountPrinter::OP_RETURN_MENU:
@@ -187,4 +190,56 @@ bool BankOptionAdapter::dealWithOption(
         break;
     }
     return returnPrevMenu;
+}
+
+void BankOptionAdapter::viewAccountBalance(
+        const BankAccount &bank_account) const
+{
+    BankAccountPrinter& bank_printer = BankAccountPrinter::getInstance();
+    std::ostream& out = bank_printer.getOutStream();
+
+    double left_balance = bank_account.getBalance();
+    out << "You have $" << left_balance << " in your bank account." << std::endl;
+}
+
+void BankOptionAdapter::depoistMoney(
+        BankAccount& bank_account) const
+{
+    BankAccountPrinter& bank_printer = BankAccountPrinter::getInstance();
+    std::ostream& out = bank_printer.getOutStream();
+    std::istream& in = bank_printer.getInStream();
+
+    double amount = .0;
+    double left_balance = bank_account.getBalance();
+    out << "Please select the amount you wish to depoisit: $";
+    in >> amount;
+
+    if (amount < 0)
+        std::cerr << "Invalid amount." << std::endl;
+    else
+        bank_account.setBalance(left_balance + amount);
+}
+
+void BankOptionAdapter::withdrawMoney(
+        BankAccount& bank_account) const
+{
+    BankAccountPrinter& bank_printer = BankAccountPrinter::getInstance();
+    std::ostream& out = bank_printer.getOutStream();
+    std::istream& in = bank_printer.getInStream();
+
+    double amount = .0;
+    double left_balance = bank_account.getBalance();
+    out << "Please select the amount you wish to withdraw: $";
+    in >> amount;
+
+    if (amount < 0 || amount > left_balance)
+        std::cerr << "Invalid amount." << std::endl;
+    else
+        bank_account.setBalance(left_balance - amount);
+}
+
+void BankOptionAdapter::printHistory(
+        BankAccount const& /*bank_account*/) const
+{
+
 }
